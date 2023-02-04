@@ -1,0 +1,17 @@
+.previewImageSection:hover {
+    background-color: rgba(5, 5, 5, 0.4);
+}
+
+.previewImageButton:hover {
+    background: rgba(5, 5, 5, 0.45);
+}
+
+
+.draggedOver {
+    background-color: rgba(255, 255, 255, 0.7);
+}
+
+.draggedOver p,
+.draggedOver i {
+    opacity: 1;
+}
