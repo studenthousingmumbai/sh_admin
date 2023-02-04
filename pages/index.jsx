@@ -1,13 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 
-import Layout from '../../components/common/Layout';
+import Layout from '../components/common/Layout';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/20/solid'
-import Pagination from '../../components/common/Pagination'; 
-import { ScopeTypes } from '../../constants'
-import Search from '../../components/common/Search';
-import { getNumPages } from '../../utils/getNumPages';
-import useApi from '../../hooks/useApi';
+import Pagination from '../components/common/Pagination'; 
+import { ScopeTypes } from '../constants'
+import Search from '../components/common/Search';
+import { getNumPages } from '../utils/getNumPages';
+import useApi from '../hooks/useApi';
 
 export default function Example() {
     const router = useRouter(); 
