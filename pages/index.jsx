@@ -90,7 +90,7 @@ export default function Example() {
 
             <Search 
                 placeholder="Search Users"
-                api_endpoint='http://localhost:8000/user/search-users'
+                api_endpoint={`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/search-users`}
                 onResult={handleSearch}
             />
 
