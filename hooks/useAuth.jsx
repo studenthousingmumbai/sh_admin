@@ -11,7 +11,7 @@ const useAuth = (props) => {
     const [signupErrors, setSignupErrors] = useState([]); 
     const { isAuthenticated: isUserAuthenticated, signin } = useApi(); 
     
-    const home_route = '/users'; 
+    const home_route = '/'; 
 
     const isAuth = async () => { 
         setIsLoading(true); 

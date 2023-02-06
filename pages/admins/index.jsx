@@ -8,7 +8,7 @@ import Pagination from '../../components/common/Pagination';
 import { ScopeTypes } from '../../constants'
 import Search from '../../components/common/Search';
 import { getNumPages } from '../../utils/getNumPages';
-
+import useApi from '../../hooks/useApi';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -30,6 +30,8 @@ export default function Example() {
     const [searchResults, setSearchResults] = useState([]); 
     const [searchQuery, setSearchQuery] = useState(""); 
     const is_mounted = useRef(false); 
+    const { getUsers } = useApi();
+    
 
     useEffect(() => {
         if(!is_mounted.current) { 
@@ -60,7 +62,7 @@ export default function Example() {
 
 
   const fetchAdmins = async (skip) => { 
-    const { users: admins, total } = await api.getUsers({ 
+    const { users: admins, total } = await getUsers({ 
         filters: { scope: ScopeTypes.ADMIN }, 
         skip, 
         limit: pageLimit  
@@ -124,7 +126,7 @@ export default function Example() {
             
             <Search 
                 placeholder="Search Admins"
-                api_endpoint='http://localhost:8000/user/search-admins'
+                api_endpoint={`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/search-admins`}
                 onResult={handleSearch}
             />
 

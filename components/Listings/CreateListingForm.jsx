@@ -133,7 +133,6 @@ export default function Example() {
     setAddress(""); 
     setPrice(""); 
     setImages([]); 
-    setFloorPlan(null); 
     setAmenities([]); 
     setGender(''); 
   }

@@ -22,7 +22,7 @@ import withAuth from '../../hooks/withAuth';
 import useAuth from '../../hooks/useAuth';
 
 const navigation = [
-  { name: 'Manage Users', href: '/users', icon: UserCircleIcon, current: true },
+  { name: 'Manage Users', href: '/', icon: UserCircleIcon, current: true },
   { name: 'Manage Admins', href: '/admins', icon: UsersIcon, current: false },
   { name: 'Manage Listings', href: '/listing', icon: HomeIcon, current: false },
   // { name: 'Manage Orders', href: '/orders', icon: DocumentCheckIcon, current: false },

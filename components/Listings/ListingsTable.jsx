@@ -97,7 +97,7 @@ export default function Example() {
 
       <Search 
         placeholder="Search Listings"
-        api_endpoint='http://localhost:8000/listing/search-listings'
+        api_endpoint={`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/search-listings`}
         onResult={handleSearch}
       />
 
