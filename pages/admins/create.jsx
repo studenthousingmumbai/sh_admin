@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import api from '../../lib/api';
 import { RoleTypes } from '../../constants';
 import Errors from '../../components/common/Errors'; 
+import useApi from '../../hooks/useApi';
 
 const roleOptions = [
     { id: RoleTypes.ADMIN, title: RoleTypes.ADMIN  },
@@ -19,6 +20,7 @@ export default function Home() {
     const [password, setPassword] = useState(""); 
     const [role, setRole] = useState(""); 
     const [errors, setErrors] = useState(""); 
+    const { adminSignup } = useApi();
 
     const resetForm = () => { 
         // reset form state 
@@ -32,7 +34,7 @@ export default function Home() {
     const handleSubmit =  async (e) => { 
         e.preventDefault();
 
-        const response = await api.adminSignup(firstName.trim(), lastName.trim(), email.trim(), password, role); 
+        const response = await adminSignup(firstName.trim(), lastName.trim(), email.trim(), password, role); 
 
         if('errors' in response) { 
             setErrors(response.errors); 

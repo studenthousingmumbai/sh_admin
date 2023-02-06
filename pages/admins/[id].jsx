@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import api from '../../lib/api';
 import { RoleTypes } from '../../constants';
+import useApi from '../../hooks/useApi';
 
 const roleOptions = [
     { id: RoleTypes.ADMIN, title: RoleTypes.ADMIN  },
@@ -20,6 +21,7 @@ export default function Home() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState(""); 
     const [role, setRole] = useState(""); 
+    const { updateUser } = useApi(); 
 
     useEffect(() => { 
         if(isReady){
@@ -64,7 +66,7 @@ export default function Home() {
         }
 
         try{ 
-            const response = await api.updateUser(user_obj); 
+            const response = await updateUser(user_obj); 
             console.log(response); 
         } 
         catch(err) { 
