@@ -21,7 +21,7 @@ export default function Home() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState(""); 
     const [role, setRole] = useState(""); 
-    const { updateUser } = useApi(); 
+    const { updateUser, getUser } = useApi(); 
 
     useEffect(() => { 
         if(isReady){
@@ -31,7 +31,7 @@ export default function Home() {
     }, [isReady]); 
 
     const fetchAdmin = async () => { 
-        const admin = await api.getUser(id); 
+        const admin = await getUser(id); 
         console.log("admin: ", admin); 
 
         setFirstname(admin.firstname); 
