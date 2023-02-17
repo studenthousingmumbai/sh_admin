@@ -97,10 +97,10 @@ export default function Example() {
 
       <Search 
         placeholder="Search Listings"
-        api_endpoint={`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/search-listings`}
+        api_endpoint={`${process.env.NEXT_PUBLIC_API_BASE_URL}/listing/search-listings`}
         onResult={handleSearch}
       />
-
+ 
       <div className="mt-3 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
