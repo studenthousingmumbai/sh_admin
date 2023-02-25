@@ -25,7 +25,7 @@ const navigation = [
   { name: 'Manage Users', href: '/', icon: UserCircleIcon, current: true },
   { name: 'Manage Admins', href: '/admins', icon: UsersIcon, current: false },
   { name: 'Manage Listings', href: '/listing', icon: HomeIcon, current: false },
-  // { name: 'Manage Orders', href: '/orders', icon: DocumentCheckIcon, current: false },
+  { name: 'Manage Orders', href: '/orders', icon: DocumentCheckIcon, current: false },
   // { name: 'Settings', href: '/settings', icon: Cog6ToothIcon, current: false },
 ]
 const userNavigation = [

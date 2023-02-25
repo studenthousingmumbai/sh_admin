@@ -8,7 +8,7 @@ import Pagination from '../../components/common/Pagination';
 import { ScopeTypes } from '../../constants'
 import Search from '../../components/common/Search';
 import { getNumPages } from '../../utils/getNumPages';
-
+import useApi from '../../hooks/useApi';
 
 const order_status_color_scheme = { 
     CREATED: ' bg-blue-100 text-blue-800', 
@@ -17,67 +17,9 @@ const order_status_color_scheme = {
     CANCELLED: ' bg-pink-100 text-pink-800'
 }
 
-const orders = [ 
-    { 
-        user:  "Tanay Kulkarni", 
-        status: "CREATED", 
-        listing_name:  "Ganga Nivas", 
-        floor: "2", 
-        room_no: "2", 
-        bed: "1", 
-        amount: "10000", 
-        days_remaining: "__", 
-        createdAt: "2023-01-30T13:07:43.836Z"
-    }, 
-    { 
-        user:  "Varun Panchal", 
-        status: "COMPLETED", 
-        listing_name:  "Ganga Nivas", 
-        floor: "2", 
-        room_no: "1", 
-        bed: "1", 
-        amount: "10000", 
-        days_remaining: "365", 
-        createdAt: "2023-01-30T13:07:43.836Z"
-    }, 
-    { 
-        user:  "Gaurav Bhatena", 
-        status: "IN_PROGRESS", 
-        listing_name:  "Ganga Nivas", 
-        floor: "2", 
-        room_no: "3", 
-        bed: "1", 
-        amount: "10000", 
-        days_remaining: "__", 
-        createdAt: "2023-01-30T13:07:43.836Z"
-    }, 
-    { 
-        user:  "Kamlesh Bhatena", 
-        status: "COMPLETED", 
-        listing_name:  "Ganga Nivas", 
-        floor: "5", 
-        room_no: "2", 
-        bed: "1", 
-        amount: "10000", 
-        days_remaining: "200", 
-        createdAt: "2023-01-30T13:07:43.836Z"
-    }, 
-    { 
-        user:  "Pavan Panchal", 
-        status: "COMPLETED", 
-        listing_name:  "Ganga Nivas", 
-        floor: "2", 
-        room_no: "5", 
-        bed: "1", 
-        amount: "10000", 
-        days_remaining: "50", 
-        createdAt: "2023-01-30T13:07:43.836Z"
-    }
-]
-
 export default function Example() {
     const router = useRouter(); 
-    // const [orders, setOrders] = useState([]); 
+    const [orders, setOrders] = useState([]); 
     const [sortOrder, setSortOrder] = useState("asc");
     const [pageLimit, setPageLimit] = useState(10); 
     const [totalPages, setTotalPages] = useState(1); 
@@ -86,38 +28,39 @@ export default function Example() {
     const [searchResults, setSearchResults] = useState([]); 
     const [searchQuery, setSearchQuery] = useState(""); 
     const is_mounted = useRef(false); 
+    const { getOrders } = useApi(); 
 
     useEffect(() => {
         if(!is_mounted.current) { 
             is_mounted.current = true; 
         }
-        // get the first batch of users (skip 0 results)
-        // fetchOrders(0); 
+        // get the first batch of orders (skip 0 results)
+        fetchOrders(0); 
     }, []);
 
-    // useEffect(() => {  
-    //     if(is_mounted.current) { 
-    //         console.log("Current page has changed: ", currentPage);
-    //         if(currentPage > 1) { 
-    //             fetchUsers((currentPage - 1) * pageLimit);
-    //         } else{ 
-    //             fetchUsers(0);
-    //         }
-    //     }
-    // }, [currentPage]);
+    useEffect(() => {  
+        if(is_mounted.current) { 
+            console.log("Current page has changed: ", currentPage);
+            if(currentPage > 1) { 
+                fetchOrders((currentPage - 1) * pageLimit);
+            } else{ 
+                fetchOrders(0);
+            }
+        }
+    }, [currentPage]);
   
-    // const fetchUsers = async (skip) => { 
-    //     const { users: all_users, total } = await api.getUsers({ 
-    //         filters: { scope: ScopeTypes.USER }, 
-    //         skip, 
-    //         limit: pageLimit 
-    //     });
-    //     const total_pages = getNumPages(total, pageLimit); 
+    const fetchOrders = async (skip) => { 
+        const { orders: all_orders, total } = await getOrders({ 
+            filters: { }, 
+            skip, 
+            limit: pageLimit 
+        });
+        const total_pages = getNumPages(total, pageLimit); 
 
-    //     setTotalResults(total); 
-    //     setUsers(all_users); 
-    //     setTotalPages(total_pages); 
-    // } 
+        setTotalResults(total); 
+        setOrders(all_orders); 
+        setTotalPages(total_pages); 
+    } 
 
     const sortOrders = (users, sortAttribute) => {
         let sortedUsers = [...users];
@@ -134,7 +77,7 @@ export default function Example() {
             setSortOrder("asc");
         }
 
-        setUsers(sortedUsers);
+        setOrders(sortedUsers);
     };
 
     const handleSearch = (searchTerm, results) => { 
@@ -155,8 +98,8 @@ export default function Example() {
 
             <Search 
                 placeholder="Search Orders"
-                // api_endpoint='http://localhost:8000/user/search-users'
-                // onResult={handleSearch}
+                api_endpoint={`${process.env.NEXT_PUBLIC_API_BASE_URL}/order/search-orders`}
+                onResult={handleSearch}
             />
 
             <div className="mt-3 flex flex-col">
@@ -176,7 +119,7 @@ export default function Example() {
                                             </a>
                                         </th>
                                         <th scope="col" className="px-3 py-3.5 text-left px-6 text-sm font-semibold text-gray-900">
-                                            <a href="#" className="group inline-flex items-center"  onClick={() => sortOrders(orders, "listing_name")}>
+                                            <a href="#" className="group inline-flex items-center"  onClick={() => sortOrders(orders, "listing")}>
                                                 Listing 
                                                 <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
                                                     <ChevronUpIcon className="h-4 w-4 hover:text-gray-300" aria-hidden="true" />
@@ -194,8 +137,17 @@ export default function Example() {
                                             </a>
                                         </th>
                                         <th scope="col" className="px-3 py-3.5 text-left px-6 text-sm font-semibold text-gray-900">
-                                            <a href="#" className="group inline-flex items-center" onClick={() => sortOrders(orders, "room_no")}>
-                                                Room No  
+                                            <a href="#" className="group inline-flex items-center" onClick={() => sortOrders(orders, "course")}>
+                                                Course  
+                                                <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
+                                                    <ChevronUpIcon className="h-4 w-4 hover:text-gray-300" aria-hidden="true"/>
+                                                    <ChevronDownIcon className="h-4 w-4 hover:text-gray-300" aria-hidden="true"/>
+                                                </span>
+                                            </a>
+                                        </th>
+                                        <th scope="col" className="px-3 py-3.5 text-left px-6 text-sm font-semibold text-gray-900">
+                                            <a href="#" className="group inline-flex items-center" onClick={() => sortOrders(orders, "year")}>
+                                                Year  
                                                 <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
                                                     <ChevronUpIcon className="h-4 w-4 hover:text-gray-300" aria-hidden="true"/>
                                                     <ChevronDownIcon className="h-4 w-4 hover:text-gray-300" aria-hidden="true"/>
@@ -229,7 +181,7 @@ export default function Example() {
                                                 </span>
                                             </a>
                                         </th>
-                                        <th scope="col" className="px-3 py-3.5 text-left px-6 text-sm font-semibold text-gray-900">
+                                        {/* <th scope="col" className="px-3 py-3.5 text-left px-6 text-sm font-semibold text-gray-900">
                                             <a href="#" className="group inline-flex items-center" onClick={() => sortOrders(orders, "status")}>
                                                 Status 
                                                 <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
@@ -237,16 +189,17 @@ export default function Example() {
                                                     <ChevronDownIcon className="h-4 w-4 hover:text-gray-300" aria-hidden="true"/>
                                                 </span>
                                             </a>
-                                        </th>
+                                        </th> */}
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200 bg-white">
                                     {orders.length > 0 && searchResults.length === 0 && searchQuery === "" && orders.map((order) => (
                                         <tr key={order.id}>
                                             <td className='whitespace-nowrap py-4 pr-3 text-sm font-medium text-gray-900 px-6'> {order.user} </td>
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.listing_name}</td>
+                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.listing}</td>
                                             <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.floor}</td>
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.room_no}</td>
+                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.course}</td>
+                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.year}</td>
                                             <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.amount}</td>
                                             <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{new Date(order.createdAt).toDateString()}</td>
                                             <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
@@ -259,11 +212,11 @@ export default function Example() {
                                                     order.days_remaining
                                                 }
                                             </td>
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                                            {/* <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                                                 <span className={"inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" + order_status_color_scheme[order.status]}>
                                                     {order.status}
                                                 </span>
-                                            </td>
+                                            </td> */}
                                         </tr>
                                     ))}
                                     
@@ -271,9 +224,10 @@ export default function Example() {
                                         searchQuery !== "" && searchResults.map((order) => (
                                             <tr key={order.id}>
                                                 <td className='whitespace-nowrap py-4 pr-3 text-sm font-medium text-gray-900 px-6'> {order.user} </td>
-                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.listing_name}</td>
+                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.listing}</td>
                                                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.floor}</td>
-                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.room_no}</td>
+                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.course}</td>
+                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.year}</td>
                                                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.amount}</td>
                                                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{new Date(order.createdAt).toDateString()}</td>
                                                 <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
@@ -286,11 +240,11 @@ export default function Example() {
                                                         order.days_remaining
                                                     }
                                                 </td>
-                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                                                {/* <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                                                     <span className={"inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" + order_status_color_scheme[order.status]}>
                                                         {order.status}
                                                     </span>
-                                                </td>
+                                                </td> */}
                                             </tr>
                                         ))
                                     }

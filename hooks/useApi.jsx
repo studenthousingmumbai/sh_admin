@@ -326,7 +326,22 @@ export default function useApi() {
         }
     } 
 
+    const getOrders = async (data) => { 
+        try{ 
+            const response = await axios(base_url + `/order/all`, { 
+                method: "POST", 
+                data 
+            }); 
+            return response.data; 
+        }
+        catch(err){ 
+            console.log(err); 
+            return err.response.data; 
+        }
+    }
+
     return { 
+        getOrders, 
         addAppartment, 
         addFloor,
         adminSignup,
