@@ -41,6 +41,11 @@ export default function index() {
     const [amenities, setAmenities] = useState([]); 
     const [gender, setGender] = useState(''); 
     const [existingImages, setExistingImages] = useState([]); 
+    const [line_1, setLine1] = useState(""); 
+    const [line_2, setLine2] = useState(""); 
+    const [city, setCity] = useState(""); 
+    const [state, setState] = useState(""); 
+    const [zip, setZip] = useState(""); 
     const { getListing, updateListing } = useApi();
  
     const fetchListing = async () => { 
@@ -50,7 +55,11 @@ export default function index() {
 
         setName(listing.name); 
         setDescription(listing.description); 
-        setAddress(listing.address); 
+        setLine1(listing.address.line_1);
+        setLine2(listing.address.line_2); 
+        setCity(listing.address.city); 
+        setState(listing.address.state); 
+        setZip(listing.address.zip); 
         setPrice(parseInt(listing.price));
         setAmenities(listing.amenities.map(amenity => ({ name: amenity }))); 
         setGender(listing.gender); 
@@ -74,7 +83,7 @@ export default function index() {
         formData.append("id", listing_id); 
         formData.append('name', name); 
         formData.append('description', description); 
-        formData.append('address', address);
+        formData.append('address', JSON.stringify({ line_1, line_2, city, state, zip }));
         formData.append('price', price); 
         formData.append('gender', gender); 
         formData.append('amenities', JSON.stringify(amenities.map(amenity => amenity.name))); 
@@ -106,6 +115,11 @@ export default function index() {
       setImages([]); 
       setAmenities([]); 
       setGender(''); 
+      setLine1(''); 
+      setLine2(''); 
+      setCity(''); 
+      setState(''); 
+      setZip(''); 
     }
 
     return (
@@ -129,7 +143,7 @@ export default function index() {
                                             className="mr-2 text-gray-500 hover:text-gray-600 inline-flex items-center rounded-full border border-transparent bg-gray-100 p-1.5 text-white shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
                                             onClick={() => router.push('/listing')}
                                         >
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 stroke-black">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                                             </svg>
                                         </button>
@@ -207,19 +221,59 @@ export default function index() {
                                 </div>
 
                                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                                <label htmlFor="about" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                                    Address
-                                </label>
-                                <div className="mt-1 sm:col-span-2 sm:mt-0">
-                                    <textarea
-                                        value={address}
-                                        onChange={e => setAddress(e.target.value)}
-                                        rows={3}
-                                        className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                        defaultValue={''}
-                                    />
-                                    <p className="mt-2 text-sm text-gray-500">Full property address with zip code</p>
-                                </div>
+                                    <label htmlFor="about" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                        Address
+                                    </label>
+                                    <div className="mt-1 sm:col-span-2 sm:mt-0">
+                                        <div className='flex mb-3'>
+                                        <input
+                                            type="text"
+                                            value={line_1}
+                                            onChange={e => setLine1(e.target.value)}
+                                            placeholder="Address line 1"
+                                            autoComplete="username"
+                                            className="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm mr-2"
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            value={line_2}
+                                            onChange={e => setLine2(e.target.value)}
+                                            placeholder="Address line 2"
+                                            autoComplete="username"
+                                            className="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                        />
+                                        </div>
+                                        <div className='flex mb-3'>
+                                        <input
+                                            type="text"
+                                            value={city}
+                                            onChange={e => setCity(e.target.value)}
+                                            placeholder="City"
+                                            autoComplete="username"
+                                            className="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm mr-2"
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            value={state}
+                                            onChange={e => setState(e.target.value)}
+                                            placeholder="State"
+                                            autoComplete="username"
+                                            className="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm mr-2"
+                                            required
+                                        />
+                                        <input
+                                            type="number"
+                                            value={zip}
+                                            onChange={e => setZip(e.target.value)}
+                                            placeholder="Zip code"
+                                            autoComplete="username"
+                                            className="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                            required
+                                        />
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">

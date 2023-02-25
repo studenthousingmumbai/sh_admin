@@ -15,6 +15,7 @@ export default function EditAppartment() {
     const [walkthroughUrl, setWalkthroughUrl] = useState(""); 
     const [open, setOpen] = useState(false); 
     const [roomNumber, setRoomNumber] = useState(null); 
+    const [bedNumber, setBedNumber] = useState(null); 
     const [floorPlan, setFloorPlan] = useState(null); 
     const [floorPlanUrl, setFloorPlanUrl] = useState("");
     const [boxes, setBoxes] = useState([]); 
@@ -35,39 +36,35 @@ export default function EditAppartment() {
     }
 
     const createBed = async (e) => { 
+        console.log("createBed called!");
         e.preventDefault(); 
+
+        setOpen(false); 
 
         const create_bed_res = await create_bed({ 
             appartment_id, 
             bbox: currentBbox, 
-            room_no: roomNumber 
+            room_no: roomNumber, 
+            bed_no: bedNumber
         }); 
-
-        setBoxes([
-            ...boxes, 
-            {
-                ...currentBbox, 
-                room_no: roomNumber, 
-                id: create_bed_res.id
-            }, 
-        ]); 
-
-        // setBoxes([...boxes, { }])
-
         console.log("Create bed response: ", create_bed_res); 
+        
+        const all_boxes = [...boxes]; 
+        const box_without_id = all_boxes.findIndex(box => !('id' in box)); 
+
+        all_boxes[box_without_id].id = create_bed_res.id; 
+        all_boxes[box_without_id].room_no = roomNumber; 
+        all_boxes[box_without_id].bed_no = bedNumber; 
+
+        setBoxes(all_boxes); 
+
+        console.log("All boxes: ", all_boxes);
     }
 
-
     const fetchListing = async () => { 
-        const listing = await getListing(listing_id); 
-  
-        console.log("listing retrieved: ", listing);
-        console.log("listing floors: ", listing.floors);
-  
+        const listing = await getListing(listing_id);   
         const target_floor = listing.floors.find(floor => floor.floor_number === floorNumber); 
         const target_appartment = target_floor.appartments.find(appartment => appartment.id === appartment_id);
-
-        console.log("Found target appartment: ", target_appartment); 
 
         // fetch all the beds for the appartment here 
         const all_beds = await getBeds(appartment_id); 
@@ -99,8 +96,6 @@ export default function EditAppartment() {
 
     useEffect(() => { 
         if(isReady){
-            console.log("listing id: ", listing_id); 
-            console.log("appartment id: ", appartment_id); 
             fetchListing();
         }
     }, [isReady]); 
@@ -120,17 +115,11 @@ export default function EditAppartment() {
         // create form data with encoded data here 
         const formData = new FormData(); 
 
-        console.log(appartment_id);
-        console.log(boxes);
-        console.log(walkthroughUrl);
-        console.log(floorPlan);
-
         formData.append('appartment_id', appartment_id); 
-        // formData.append('beds', JSON.stringify(boxes)); 
         formData.append('walkthrough_url', walkthroughUrl); 
         !floorPlanUrl && formData.append('floor_plan', floorPlan); 
-        // send api request with form data to update appartment details 
 
+        // send api request with form data to update appartment details 
         const save_appartment_response = await updateAppartment(formData);
         console.log(save_appartment_response); 
         
@@ -142,7 +131,6 @@ export default function EditAppartment() {
     }
 
     const handleModalClose = (args) => {
-        console.log("handle close args: ", args);  
         setOpen(false); 
 
         // clear the current bbox from the list of boxes 
@@ -161,7 +149,7 @@ export default function EditAppartment() {
                     className="mr-2 text-gray-500 hover:text-gray-600 inline-flex items-center rounded-full border border-transparent bg-gray-100 p-1.5 text-white shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
                     onClick={() => router.push(`/listing/${listing_id}/floors/${floorNumber}`)}
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 stroke-black">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
                 </button>
@@ -187,7 +175,7 @@ export default function EditAppartment() {
                             setCurrentBbox={setCurrentBbox}
                         />
                     </div>  
-                    <div className="w-[350px]  h-[70vh] bg-gray-200 border border-gray-300 p-3 overflow-auto">
+                    {/* <div className="w-[350px]  h-[70vh] bg-gray-200 border border-gray-300 p-3 overflow-auto">
                         <h1>Added Beds</h1>
                         {
                             boxes && boxes.map((box,bed_index) => ( 
@@ -199,7 +187,7 @@ export default function EditAppartment() {
                                 </div>
                             ))
                         }
-                    </div>
+                    </div> */}
                 </div> 
             }
 
@@ -227,11 +215,19 @@ export default function EditAppartment() {
                         value={roomNumber} 
                         onChange={e => setRoomNumber(e.target.value)} 
                         className='block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm mb-3'
+                        required
+                    />
+                    <input 
+                        type='text' 
+                        placeholder='Enter Bed Number'
+                        value={bedNumber} 
+                        onChange={e => setBedNumber(e.target.value)} 
+                        className='block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm mb-3'
+                        required
                     />
                     <button
                         type="submit"
                         className="inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
-                        onClick={() => setOpen(false)}
                     > 
                         Save Bed
                     </button>

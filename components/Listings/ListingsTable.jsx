@@ -4,6 +4,8 @@ import { useRouter } from 'next/router'
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/20/solid'
 import Pagination from '../../components/common/Pagination'; 
 import Search from '../../components/common/Search';
+import Switch from '../../components/common/Switch'; 
+
 import { getNumPages } from '../../utils/getNumPages';
 import useApi from '../../hooks/useApi';
 
@@ -18,7 +20,7 @@ export default function Example() {
   const [searchResults, setSearchResults] = useState([]); 
   const [searchQuery, setSearchQuery] = useState(""); 
   const is_mounted = useRef(false); 
-  const { getAllListings } = useApi();
+  const { getAllListings, updateListing } = useApi();
 
   useEffect(() => {
     if(!is_mounted.current) { 
@@ -47,6 +49,8 @@ export default function Example() {
     }); 
     const total_pages = getNumPages(total, pageLimit); 
 
+    console.log("All listings: " , all_listings);
+
     setTotalResults(total); 
     setListings(all_listings); 
     setTotalPages(total_pages); 
@@ -73,6 +77,19 @@ export default function Example() {
   const handleSearch = (searchTerm, results) => { 
     setSearchQuery(searchTerm); 
     setSearchResults(results);  
+  }
+
+  const publishListing = async (id, value) => { 
+    const data = new FormData(); 
+
+    data.append('id', id); 
+    data.append('publish', value);
+
+    const update_response = await updateListing(data); 
+
+    console.log("update response: ", update_response); 
+
+    fetchListings((currentPage - 1) * pageLimit);
   }
 
   return (
@@ -144,6 +161,24 @@ export default function Example() {
                         </span>
                       </a>
                     </th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 px-6">
+                      <a href="#" className="group inline-flex items-center" onClick={() => { sortListings(listings, "gender")}}>
+                        Status
+                        <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
+                            <ChevronUpIcon className="h-4 w-4 hover:text-gray-300" aria-hidden="true" />
+                            <ChevronDownIcon className="h-4 w-4 hover:text-gray-300" aria-hidden="true" />
+                        </span>
+                      </a>
+                    </th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 px-6">
+                      <a href="#" className="group inline-flex items-center" onClick={() => { sortListings(listings, "gender")}}>
+                        Publish
+                        <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
+                            <ChevronUpIcon className="h-4 w-4 hover:text-gray-300" aria-hidden="true" />
+                            <ChevronDownIcon className="h-4 w-4 hover:text-gray-300" aria-hidden="true" />
+                        </span>
+                      </a>
+                    </th>
                     <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6 px-6">
                       <span className="sr-only">Edit</span>
                     </th>
@@ -158,7 +193,11 @@ export default function Example() {
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 px-6">{listing.description}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 px-6">{listing.price}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 px-6">{listing.gender}</td>
-                      <td className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 px-6">
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 px-6">{listing.publish ? 'Active' : "Inactive"}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 px-6">
+                        <Switch onChange={value => publishListing(listing.id, value)} enabled={listing.publish}/>
+                      </td>
+                      <td className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 px-6 ">
                         <a href="#" className="text-indigo-600 hover:text-indigo-900 mr-2" onClick={() => router.push(`/listing/${listing.id}`)}>
                           Edit
                         </a>
@@ -174,7 +213,11 @@ export default function Example() {
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 px-6">{listing.description}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 px-6">{listing.price}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 px-6">{listing.gender}</td>
-                      <td className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 px-6">
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 px-6">{listing.publish ? 'Active' : "Inactive"}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 px-6">
+                        <Switch onChange={value => publishListing(listing.id, value)} enabled={listing.publish}/>
+                      </td>
+                      <td className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 px-6 ">
                         <a href="#" className="text-indigo-600 hover:text-indigo-900 mr-2" onClick={() => router.push(`/listing/${listing.id}`)}>
                           Edit
                         </a>
@@ -185,7 +228,7 @@ export default function Example() {
                   {
                     searchQuery === "" && 
                     <tr>
-                        <td colSpan="5">
+                        <td colSpan="7">
                             <div className='flex w-full justify-end bg-red'> 
                                 <Pagination 
                                     totalPages={totalPages}
