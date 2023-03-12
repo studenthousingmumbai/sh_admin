@@ -8,6 +8,7 @@ import DynamicForm from '../../../components/common/DynamicList';
 import Tabs from '../../../components/common/Tabs';
 import { field_types, field_variants } from '../../../constants';
 import useApi from '../../../hooks/useApi';
+import Errors from '../../../components/common/Errors';
 
 const fields = {
     name: {
@@ -46,6 +47,7 @@ export default function index() {
     const [city, setCity] = useState(""); 
     const [state, setState] = useState(""); 
     const [zip, setZip] = useState(""); 
+    const [errors, setErrors] = useState([]);
     const { getListing, updateListing } = useApi();
  
     const fetchListing = async () => { 
@@ -76,8 +78,6 @@ export default function index() {
     const handleSubmit =  async (e) => { 
       e.preventDefault(); 
   
-      // send create listing request here 
-      try{ 
         const formData = new FormData(); 
         
         formData.append("id", listing_id); 
@@ -94,16 +94,16 @@ export default function index() {
                 formData.append('images', image.file); 
             }
         }
-  
+
         const response = await updateListing(formData); 
-        console.log(response); 
-      } 
-      catch(err) { 
-        console.log("error: ", err); 
-      }
-  
-      resetForm(); 
-      router.push('/listing');
+        
+        if('errors' in response) { 
+            setErrors(response.errors);
+            return;
+        }
+
+        resetForm(); 
+        router.push('/listing');
     }
   
     const resetForm = () => { 
@@ -350,7 +350,10 @@ export default function index() {
                             </div>
                         </div>
                         </div>
-                        
+                        {
+                            errors.length > 0 && 
+                            <Errors errors={errors}/>
+                        }
                         <div className="pt-5">
                             <div className="flex justify-end">
                             <button

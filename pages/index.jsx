@@ -120,6 +120,15 @@ export default function Example() {
                                             </a>
                                         </th>
                                         <th scope="col" className="px-3 py-3.5 text-left px-6 text-sm font-semibold text-gray-900">
+                                            <a href="#" className="group inline-flex items-center"  onClick={() => sortUsers(users, "verified")}>
+                                                Verified
+                                                <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
+                                                    <ChevronUpIcon className="h-4 w-4 hover:text-gray-300" aria-hidden="true" />
+                                                    <ChevronDownIcon className="h-4 w-4 hover:text-gray-300" aria-hidden="true" />
+                                                </span>
+                                            </a>
+                                        </th>
+                                        <th scope="col" className="px-3 py-3.5 text-left px-6 text-sm font-semibold text-gray-900">
                                             <a href="#" className="group inline-flex items-center" onClick={() => sortUsers(users, "createdAt")}>
                                                 Joined On  
                                                 <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
@@ -133,22 +142,24 @@ export default function Example() {
                                 <tbody className="divide-y divide-gray-200 bg-white">
                                     {users.length > 0 && searchResults.length === 0 && searchQuery === "" && users.map((user) => (
                                         <tr key={user.id}>
-                                            <td className='whitespace-nowrap py-4 pr-3 text-sm font-medium text-gray-900 px-6'>
+                                            <td className='whitespace-nowrap py-4 text-sm font-medium text-gray-900 px-6'>
                                                 {user.firstname + " " + user.lastname}
                                             </td>
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{user.email}</td>
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{new Date(user.createdAt).toDateString()}</td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{user.email}</td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{user.verified ? "Verified": "Un-verified"}</td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{new Date(user.createdAt).toDateString()}</td>
                                         </tr>
                                     ))}
                                     
                                     {
                                         searchQuery !== "" && searchResults.map((user) => (
                                             <tr key={user.id}>
-                                                <td className='whitespace-nowrap py-4 pr-3 text-sm font-medium text-gray-900 px-6'>
+                                                <td className='whitespace-nowrap py-4 text-sm font-medium text-gray-900 px-6'>
                                                     {user.firstname + " " + user.lastname}
                                                 </td>
-                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{user.email}</td>
-                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{new Date(user.createdAt).toDateString()}</td>
+                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{user.email}</td>
+                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{user.verified ? "Verified": "Un-verified"}</td>
+                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{new Date(user.createdAt).toDateString()}</td>
                                             </tr>
                                         ))
                                     }

@@ -1,18 +1,21 @@
 import { useState, useEffect, useRef } from 'react'; 
 import useApi from '../../hooks/useApi';
 
-export default function ({ image_file, boxes, setBoxes, setOpen, setCurrentBbox }) {
+export default function ({ image_file, boxes, setBoxes, setOpen, setCurrentBbox, focusedBed, setFocusedBed }) {
     const image_canvas_ref = useRef(null); 
     const overlay_canvas_ref = useRef(null); 
     const [overlay_context, setOverlayContext] = useState(null); 
     const [image_context , setImageContext] = useState(null); 
     const { updateBed, deleteBed } = useApi(); 
+    const is_mounted = useRef(false); 
+
     const box_list = [...boxes];
     const box_coordinates = {};
 	const line_width = 2;      
 
     let startX, startY; 
 	let box_color = '#00ff00';
+    let focus_color = '#0000ff';
 	let selector_color = '#ffffff';
 	let handle_color = '#00ff00';
 	let dx = 0;
@@ -21,6 +24,7 @@ export default function ({ image_file, boxes, setBoxes, setOpen, setCurrentBbox 
 	let line_dash = [6];
 	let resize_box_index = null;
 	let hover_index = null;
+    let focus_index = focusedBed;
 	let selected_box_index = null;
 	let isDrawing = false;
 	let isDragging = false;
@@ -31,8 +35,6 @@ export default function ({ image_file, boxes, setBoxes, setOpen, setCurrentBbox 
 	let dragBR = false; 
 
     useEffect(() => {
-        console.log("Image file received: ", image_file);
-
         const image_canvas = image_canvas_ref.current;
         const imageContext = image_canvas.getContext('2d')
         setImageContext(imageContext);
@@ -62,6 +64,21 @@ export default function ({ image_file, boxes, setBoxes, setOpen, setCurrentBbox 
 
         reader.readAsDataURL(image_file);
     }, []);
+
+    useEffect(() => {
+        if(!is_mounted.current) { 
+            is_mounted.current = true; 
+        } else { 
+            if(overlay_context){ 
+                const target_index = box_list.findIndex(box => box.id === focusedBed);
+                focus_index = target_index;
+                
+                clearOverlay();
+                drawBoundingBoxes(box_list, overlay_context);
+            }
+        }
+    }, [focusedBed])
+
 
     function clearOverlay() {
         overlay_context.clearRect(0, 0, overlay.width, overlay.height);
@@ -112,10 +129,23 @@ export default function ({ image_file, boxes, setBoxes, setOpen, setCurrentBbox 
                 overlay_context.stroke();
     
                 if(hover && hover_index === i){
-                    overlay_context.fillStyle = 'rgba(0,255,0,0.3)';
+                    overlay_context.fillStyle = 'rgba(0,255,0,0.2)';
                 }
                 else{ 
-                    overlay_context.fillStyle = 'rgba(0,255,0,0.1)';
+                    overlay_context.fillStyle = 'rgba(0,255,0,0.05)';
+                }
+
+                if(focus_index == i) { 
+                    overlay_context.strokeStyle = focus_color;
+                    overlay_context.setLineDash(line_dash);
+                    overlay_context.lineWidth = line_width;
+                    overlay_context.beginPath();
+                    overlay_context.rect(box.x, box.y, box.w, box.h);  
+                    overlay_context.stroke();
+                    overlay_context.fillStyle = 'rgba(80, 148, 250,0.3)'
+                    handle_color = '#5094fa'; 
+                } else  { 
+                    handle_color = '#00ff00';
                 }
     
                 overlay_context.fillRect(box.x, box.y, box.w, box.h);   
@@ -166,8 +196,6 @@ export default function ({ image_file, boxes, setBoxes, setOpen, setCurrentBbox 
     }
 
     const handleMouseDown = (e) => { 
-        console.log("Mouse down called!!");
-
         e.preventDefault();
         e.stopPropagation();
     
@@ -198,6 +226,10 @@ export default function ({ image_file, boxes, setBoxes, setOpen, setCurrentBbox 
                 dragBR = true;
                 resize_box_index = i;
             }
+
+            if(mouse_in_rect(box, startX, startY)){
+                setFocusedBed(box.id);
+            }
         }
         
         // if none of the resize handles are clicked on 
@@ -224,8 +256,6 @@ export default function ({ image_file, boxes, setBoxes, setOpen, setCurrentBbox 
     }
 
     const handleMouseMove = (e) => { 
-        console.log("Mouse move called!!");
-
         // tell the browser we're handling this event
         e.preventDefault();
         e.stopPropagation();
@@ -327,8 +357,6 @@ export default function ({ image_file, boxes, setBoxes, setOpen, setCurrentBbox 
     }
 
     const handleMouseUp = async (e) => { 
-        console.log("Mouse up called!!");
-
         // if a box was being dragged
         if(isDragging) { 
             isDragging = false;
@@ -402,12 +430,10 @@ export default function ({ image_file, boxes, setBoxes, setOpen, setCurrentBbox 
             clearOverlay();
             drawBoundingBoxes(box_list, overlay_context);
         }
-
-        console.log("Bounding boxes: ", box_list); 
     }
 
     const handleDoubleClick = async (e) => { 
-        console.log("Double click called!!");
+        setFocusedBed(null); 
 
         e.preventDefault();
         e.stopPropagation();
@@ -438,6 +464,7 @@ export default function ({ image_file, boxes, setBoxes, setOpen, setCurrentBbox 
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onDoubleClick={handleDoubleClick}
+                onBlur={() => setFocusedBed(null)}
             />
         </div>
     )

@@ -137,6 +137,15 @@ export default function Example() {
                                             </a>
                                         </th>
                                         <th scope="col" className="px-3 py-3.5 text-left px-6 text-sm font-semibold text-gray-900">
+                                            <a href="#" className="group inline-flex items-center" onClick={() => sortOrders(orders, "college")}>
+                                                College  
+                                                <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
+                                                    <ChevronUpIcon className="h-4 w-4 hover:text-gray-300" aria-hidden="true"/>
+                                                    <ChevronDownIcon className="h-4 w-4 hover:text-gray-300" aria-hidden="true"/>
+                                                </span>
+                                            </a>
+                                        </th>
+                                        <th scope="col" className="px-3 py-3.5 text-left px-6 text-sm font-semibold text-gray-900">
                                             <a href="#" className="group inline-flex items-center" onClick={() => sortOrders(orders, "course")}>
                                                 Course  
                                                 <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
@@ -196,13 +205,14 @@ export default function Example() {
                                     {orders.length > 0 && searchResults.length === 0 && searchQuery === "" && orders.map((order) => (
                                         <tr key={order.id}>
                                             <td className='whitespace-nowrap py-4 pr-3 text-sm font-medium text-gray-900 px-6'> {order.user} </td>
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.listing}</td>
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.floor}</td>
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.course}</td>
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.year}</td>
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.amount}</td>
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{new Date(order.createdAt).toDateString()}</td>
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{order.listing}</td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{order.floor}</td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{order.college}</td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{order.course}</td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{order.year}</td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{order.amount}</td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{new Date(order.createdAt).toDateString()}</td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                                 { 
                                                     order.days_remaining !== '__' && 
                                                     <span className={"inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" + (order.days_remaining > 200 ? ' bg-green-100 text-green-800' : order.days_remaining > 50 ? ' bg-yellow-100 text-yellow-800' : ' bg-pink-100 text-pink-800' )}>
@@ -224,13 +234,14 @@ export default function Example() {
                                         searchQuery !== "" && searchResults.map((order) => (
                                             <tr key={order.id}>
                                                 <td className='whitespace-nowrap py-4 pr-3 text-sm font-medium text-gray-900 px-6'> {order.user} </td>
-                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.listing}</td>
-                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.floor}</td>
-                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.course}</td>
-                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.year}</td>
-                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{order.amount}</td>
-                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{new Date(order.createdAt).toDateString()}</td>
-                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{order.listing}</td>
+                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{order.floor}</td>
+                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{order.college}</td>
+                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{order.course}</td>
+                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{order.year}</td>
+                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{order.amount}</td>
+                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{new Date(order.createdAt).toDateString()}</td>
+                                                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                                     { 
                                                         order.days_remaining !== '__' && 
                                                         <span className={"inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" + (order.days_remaining > 200 ? ' bg-green-100 text-green-800' : order.days_remaining > 50 ? ' bg-yellow-100 text-yellow-800' : ' bg-pink-100 text-pink-800' )}>
@@ -252,7 +263,7 @@ export default function Example() {
                                     {
                                         searchQuery === "" && 
                                         <tr>
-                                            <td colSpan="8">
+                                            <td colSpan="9">
                                                 <div className='flex w-full justify-end bg-red'> 
                                                     <Pagination 
                                                         totalPages={totalPages}

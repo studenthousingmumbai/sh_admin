@@ -4,6 +4,7 @@ import DynamicForm from '../common/DynamicList';
 import { field_types, field_variants } from '../../constants';
 import { useRouter } from 'next/router';
 import useApi from '../../hooks/useApi';
+import Errors from '../../components/common/Errors';
 
 const fields = {
   name: {
@@ -71,30 +72,31 @@ export default function Example() {
   const [city, setCity] = useState(""); 
   const [state, setState] = useState(""); 
   const [zip, setZip] = useState(""); 
+  const [errors, setErrors] = useState([]); 
   const { createListing } = useApi(); 
 
   const handleSubmit =  async (e) => { 
     e.preventDefault(); 
 
     // send create listing request here 
-    try{ 
-      const formData = new FormData(); 
+    const formData = new FormData(); 
 
-      formData.append('name', name); 
-      formData.append('description', description); 
-      formData.append('price', price); 
-      formData.append('gender', gender); 
-      formData.append('address', JSON.stringify({ line_1, line_2, city, state, zip }));
-      formData.append('amenities', JSON.stringify(amenities.map(amenity => amenity.name))); 
+    formData.append('name', name); 
+    formData.append('description', description); 
+    formData.append('price', price); 
+    formData.append('gender', gender); 
+    formData.append('address', JSON.stringify({ line_1, line_2, city, state, zip }));
+    formData.append('amenities', JSON.stringify(amenities.map(amenity => amenity.name))); 
 
-      for(let image of images) {
-        formData.append('images', image.file); 
-      }
+    for(let image of images) {
+      formData.append('images', image.file); 
+    }
 
-      const response = await createListing(formData); 
-    } 
-    catch(err) { 
-      console.log("error: ", err); 
+    const response = await createListing(formData); 
+
+    if('errors' in response) { 
+      setErrors(response.errors); 
+      return;
     }
 
     resetForm(); 
@@ -312,6 +314,11 @@ export default function Example() {
       </div>
       </div>
       
+      { 
+        errors.length > 0 && 
+        <Errors errors={errors}/>
+      }
+
       <div className="pt-5">
         <div className="flex justify-end">
           <button

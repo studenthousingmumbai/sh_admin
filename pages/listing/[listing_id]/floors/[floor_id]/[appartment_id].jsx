@@ -5,8 +5,9 @@ import MultiUpload from '../../../../../components/common/MultiUpload/MultiUploa
 import BedMarkingTool from '../../../../../components/Listings/BedMarkingTool';
 import Modal from '../../../../../components/common/Modal';
 import api from '../../../../../lib/api';
-import { TrashIcon } from '@heroicons/react/20/solid'
+import { TrashIcon, PencilSquareIcon } from '@heroicons/react/20/solid'
 import useApi from '../../../../../hooks/useApi';
+import Errors from '../../../../../components/common/Errors';
 
 export default function EditAppartment() {
     const router = useRouter(); 
@@ -14,6 +15,10 @@ export default function EditAppartment() {
     const { listing_id, floor_id: floorNumber, appartment_id } = router.query; 
     const [walkthroughUrl, setWalkthroughUrl] = useState(""); 
     const [open, setOpen] = useState(false); 
+    const [editFloorPlanOpen, setEditFloorPlanOpen] = useState(false);
+    const [editOpen, setEditOpen] = useState(false);
+    const [editBed, setEditBed] = useState("");
+    const [errors, setErrors] = useState([]); 
     const [roomNumber, setRoomNumber] = useState(null); 
     const [bedNumber, setBedNumber] = useState(null); 
     const [floorPlan, setFloorPlan] = useState(null); 
@@ -23,7 +28,9 @@ export default function EditAppartment() {
     const [listingName, setListingName] = useState(""); 
     const [appartmentNo, setAppartmentNo] = useState('');
     const [currentBbox, setCurrentBbox] = useState(null); 
-    const { createBed: create_bed, getListing, getBeds, updateAppartment } = useApi();
+    const [focusedBed, setFocusedBed] = useState(null); 
+
+    const { createBed: create_bed, getListing, getBeds, updateAppartment, deleteBed, updateBed } = useApi();
 
     async function getFileFromUrl(url, name, defaultType = 'image/jpeg'){
         console.log(url);
@@ -34,12 +41,10 @@ export default function EditAppartment() {
             type: data.type || defaultType,
         });
     }
-
+ 
     const createBed = async (e) => { 
         console.log("createBed called!");
         e.preventDefault(); 
-
-        setOpen(false); 
 
         const create_bed_res = await create_bed({ 
             appartment_id, 
@@ -48,7 +53,12 @@ export default function EditAppartment() {
             bed_no: bedNumber
         }); 
         console.log("Create bed response: ", create_bed_res); 
-        
+
+        if('errors' in create_bed_res) { 
+            setErrors(create_bed_res.errors);
+            return; 
+        }
+
         const all_boxes = [...boxes]; 
         const box_without_id = all_boxes.findIndex(box => !('id' in box)); 
 
@@ -56,9 +66,11 @@ export default function EditAppartment() {
         all_boxes[box_without_id].room_no = roomNumber; 
         all_boxes[box_without_id].bed_no = bedNumber; 
 
+        setFocusedBed(null); 
         setBoxes(all_boxes); 
-
-        console.log("All boxes: ", all_boxes);
+        setRoomNumber("");
+        setBedNumber("");
+        setOpen(false); 
     }
 
     const fetchListing = async () => { 
@@ -75,9 +87,13 @@ export default function EditAppartment() {
             setBoxes(all_beds.map(bed => ({ 
                 id: bed.id, 
                 ...bed.bounding_box, 
-                room_no: bed.room_no
+                room_no: bed.room_no, 
+                bed_no: bed.bed_no 
             }))); 
-        } 
+        } else { 
+            setBeds([]); 
+            setBoxes([]);
+        }
 
         if(target_appartment) {
             setAppartmentNo(target_appartment.appartment_number); 
@@ -111,6 +127,19 @@ export default function EditAppartment() {
         }
     }
 
+    const onFloorPlanChange = async (file) => { 
+        // create form data with encoded data here 
+        const formData = new FormData(); 
+
+        formData.append('appartment_id', appartment_id); 
+        !floorPlanUrl && formData.append('floor_plan', file); 
+
+        // send api request with form data to update appartment details 
+        await updateAppartment(formData);
+
+        fetchListing();
+    }
+
     const saveAppartmentDetails = async () => { 
         // create form data with encoded data here 
         const formData = new FormData(); 
@@ -141,6 +170,54 @@ export default function EditAppartment() {
         setBoxes(all_boxes); 
     }
 
+    const handleEditClose = () => { 
+        setEditOpen(false);
+        setRoomNumber("");
+        setBedNumber("");
+        setEditBed("");
+    }
+
+    const handleUpdateBed = async (e) => {
+        e.preventDefault(); 
+
+        const updateBedResponse  = await updateBed(
+            editBed.id, 
+            { 
+                room_no: roomNumber, 
+                bed_no: bedNumber 
+            }
+        ); 
+        console.log("Update bed response: ", updateBedResponse); 
+
+        if('errors' in updateBedResponse) { 
+            setErrors(updateBedResponse.errors);
+            return; 
+        }    
+
+        setRoomNumber("");
+        setBedNumber("");
+        setEditBed("");
+        setEditOpen(false);
+        fetchListing();
+    }
+
+    const handleBedDelete = async (bed_id) => { 
+        await deleteBed(bed_id); 
+        await fetchListing();
+    }
+
+    const handleUpdateFloorPlan = async () => { 
+        // delete all previously added beds 
+        for(let box of boxes) { 
+            deleteBed(box.id); 
+        }
+
+        setBoxes([]); 
+        setFloorPlan(null); 
+        setFloorPlanUrl(""); 
+        setEditFloorPlanOpen(false);
+    }
+
     return (
         <Layout>
             <div className='flex align-center mb-5 border-b pb-3  border-gray-300'> 
@@ -156,10 +233,23 @@ export default function EditAppartment() {
                 <h3 className='text-xl font-medium leading-6 text-gray-900 mt-0.5'>{listingName} - Floor {floorNumber} - Appartment {appartmentNo}</h3>
             </div>
 
+            { 
+                floorPlan !== null && 
+                <button
+                    type="submit"
+                    className="mb-3 inline-flex justify-center rounded-md bg-white py-1.5 px-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    onClick={() => setEditFloorPlanOpen(true)}
+                >
+                    Update Floor plan
+                </button>
+            }
+
             {/* <h2 className='text-xl font-semibold mb-5'>Add beds to the apparment</h2> */}
             {
                 !floorPlanUrl && !floorPlan &&  
-                <MultiUpload onChange={(change) => setFloorPlan(change[0].file)}/>
+                <div className='mb-3'>
+                    <MultiUpload onChange={(change) => onFloorPlanChange(change[0].file)}/>
+                </div>
             }   
             
             { 
@@ -173,41 +263,110 @@ export default function EditAppartment() {
                             setBoxes={setBoxes} 
                             setOpen={setOpen} 
                             setCurrentBbox={setCurrentBbox}
+                            focusedBed={focusedBed}
+                            setFocusedBed={setFocusedBed}
                         />
                     </div>  
-                    {/* <div className="w-[350px]  h-[70vh] bg-gray-200 border border-gray-300 p-3 overflow-auto">
-                        <h1>Added Beds</h1>
+                    <div className="w-[350px]  h-[70vh] bg-gray-200 border border-gray-300 p-3 overflow-auto">
+                        <h1 className='font-semibold text-2xl mb-3'>Added Beds</h1>
                         {
                             boxes && boxes.map((box,bed_index) => ( 
                                 box.id && 
-                                <div className='bg-white rounded-sm mb-3 p-3 flex justify-between items-center'>
-                                    Bed {bed_index + 1} <br/>
-                                    Room No: {box.room_no}
-                                    <TrashIcon className='text-gray-300 hover:text-red-500 w-5 h-5 cursor-pointer' onClick={() => removeBed(bed_index)}/>
-                                </div>
+                                <button 
+                                    type="button" 
+                                    onFocus={() => setFocusedBed(box.id)} 
+                                    onBlur={() => setFocusedBed("")} 
+                                    className={'w-full bg-white rounded-sm mb-3 p-3 flex justify-between items-center hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2' + `${focusedBed === box.id && ' ring-2 ring-indigo-500 ring-offset-2'}`}
+                                >
+                                    <div>
+                                        <div>
+                                            Room No: {box.room_no}
+                                        </div>
+                                        <div>   
+                                            Bed No: {box.bed_no}
+                                        </div>  
+                                    </div>
+
+                                    <div className='flex'>
+                                        <TrashIcon className='mr-2 text-gray-300 hover:text-red-500 w-5 h-5 cursor-pointer' onClick={() => handleBedDelete(box.id)}/>
+                                        <PencilSquareIcon className='text-gray-300 hover:text-blue-500 w-5 h-5 cursor-pointer' onClick={() => { setEditBed(box); setEditOpen(true); setBedNumber(box.bed_no); setRoomNumber(box.room_no) }}/>
+                                    </div>
+                                </button>
                             ))
                         }
-                    </div> */}
+                    </div>
                 </div> 
             }
 
             <input 
                 type='text'  
                 value={walkthroughUrl}
-                placeholder='Walkthrough Url'
-                className='block min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
+                placeholder='Enter Walkthrough Url'
+                className='block min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm mb-2'
                 onChange={e => setWalkthroughUrl(e.target.value)}
             />
-
             <button
                 type="submit"
-                className="ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 onClick={saveAppartmentDetails}
             >
-                Save
+                Save Changes
             </button>
 
-            <Modal open={open} setOpen={setOpen} onClose={handleModalClose} title="Add Room Number">
+            <Modal open={editFloorPlanOpen} setOpen={setEditFloorPlanOpen} onClose={setEditFloorPlanOpen} title="Update Floor Plan">
+                <h1 className='font-normal mb-2 '>Are you sure you want to update the current floor plan? This will clear the current floor plan and delete all the previously marked beds.</h1>
+
+                <div className='flex'>
+                    <button
+                        type="submit"
+                        className="mr-2 inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
+                        onClick={handleUpdateFloorPlan}
+                    > 
+                        Yes update
+                    </button>
+                    <button
+                        type="submit"
+                        className="inline-flex w-full justify-center rounded-md bg-white py-2 px-4 text-base font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                        onClick={() => setEditFloorPlanOpen(false)}
+                    > 
+                        Cancel
+                    </button>
+                </div>
+            </Modal>
+
+            <Modal open={editOpen} setOpen={setEditOpen} onClose={handleEditClose} title="Update Bed Details">
+                <form onSubmit={(e) => handleUpdateBed(e)}>
+                    <input 
+                        type='number' 
+                        placeholder='Enter Room Number'
+                        value={roomNumber}
+                        onChange={e => setRoomNumber(e.target.value)} 
+                        className='block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm mb-3'
+                        required
+                    />
+                    <input 
+                        type='text' 
+                        placeholder='Enter Bed Number'
+                        value={bedNumber}
+                        onChange={e => setBedNumber(e.target.value)} 
+                        className='block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm mb-3'
+                        required
+                    />
+                    {
+                        errors.length > 0 && 
+                        <Errors errors={errors}/>
+                    }
+                    <button
+                        type="submit"
+                        className="inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
+                    > 
+                        Update Bed
+                    </button>
+                </form>
+            </Modal>
+
+
+            <Modal open={open} setOpen={setOpen} onClose={handleModalClose} title="Add Bed Details">
                 <form onSubmit={createBed}>
                     <input 
                         type='number' 
@@ -225,6 +384,10 @@ export default function EditAppartment() {
                         className='block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm mb-3'
                         required
                     />
+                    {
+                        errors.length > 0 && 
+                        <Errors errors={errors}/>
+                    }
                     <button
                         type="submit"
                         className="inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
