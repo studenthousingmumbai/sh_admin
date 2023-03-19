@@ -9,6 +9,15 @@ import { TrashIcon, PencilSquareIcon } from '@heroicons/react/20/solid'
 import useApi from '../../../../../hooks/useApi';
 import Errors from '../../../../../components/common/Errors';
 
+function extractSrcFromIframeString(iframeString) {
+    const srcRegex = /src="([^"]+)"/;
+    const match = iframeString.match(srcRegex);
+    if (match) {
+        return match[1];
+    }
+    return null;
+}
+
 export default function EditAppartment() {
     const router = useRouter(); 
     const { isReady } = router; 
@@ -143,9 +152,10 @@ export default function EditAppartment() {
     const saveAppartmentDetails = async () => { 
         // create form data with encoded data here 
         const formData = new FormData(); 
+        const walkthrough_url_src = extractSrcFromIframeString(walkthroughUrl);
 
+        formData.append('walkthrough_url', walkthrough_url_src || ""); 
         formData.append('appartment_id', appartment_id); 
-        formData.append('walkthrough_url', walkthroughUrl); 
         !floorPlanUrl && formData.append('floor_plan', floorPlan); 
 
         // send api request with form data to update appartment details 

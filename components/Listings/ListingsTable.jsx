@@ -5,6 +5,7 @@ import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/20/solid'
 import Pagination from '../../components/common/Pagination'; 
 import Search from '../../components/common/Search';
 import Switch from '../../components/common/Switch'; 
+import Modal from '../../components/common/Modal'; 
 
 import { getNumPages } from '../../utils/getNumPages';
 import useApi from '../../hooks/useApi';
@@ -20,7 +21,10 @@ export default function Example() {
   const [searchResults, setSearchResults] = useState([]); 
   const [searchQuery, setSearchQuery] = useState(""); 
   const is_mounted = useRef(false); 
-  const { getAllListings, updateListing } = useApi();
+  const [warningOpen, setWarningOpen] = useState(false); 
+  const [editListingId, setEditListingId] = useState(""); 
+
+  const { getAllListings, updateListing, getOrders } = useApi();
 
   useEffect(() => {
     if(!is_mounted.current) { 
@@ -92,6 +96,37 @@ export default function Example() {
     fetchListings((currentPage - 1) * pageLimit);
   }
 
+  const handleEditClick = async (listing_id) => { 
+    let hasActiveOrders = false; 
+    const { orders } = await getOrders({ 
+      filters: { 
+        listing: listing_id
+      }, 
+      skip: 0, 
+      limit: 0 
+    }); 
+
+    setEditListingId(listing_id); 
+
+    if(orders.length > 0) { 
+      for(let order of orders) { 
+        if(order.days_remaining > 0) { 
+          hasActiveOrders = true; 
+          break; 
+        }
+      }
+    }
+
+    // check if the listing has active orders 
+    if(hasActiveOrders){ 
+      setWarningOpen(true); 
+    }
+    else { 
+      router.push(`/listing/${listing_id}`); 
+      setEditListingId(""); 
+    }
+  }
+
   return (
     <div className="">
       <div className="sm:flex sm:items-center">
@@ -117,7 +152,27 @@ export default function Example() {
         api_endpoint={`${process.env.NEXT_PUBLIC_API_BASE_URL}/listing/search-listings`}
         onResult={handleSearch}
       />
- 
+  
+      <Modal title={"This listing has active orders"} open={warningOpen} onClose={() => { setWarningOpen(false); setEditListingId(""); }}>
+        <div className='mb-3'> 
+          <span>Are you sure you want to edit this listing? It currently has active orders.</span>
+        </div>
+        <button
+          type='button'
+          className="mr-2 inline-flex items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-indigo-600  px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-indigo-700 bg-[#ffcc29] hover:bg-[#fad45a]"
+          onClick={() => router.push(`/listing/${editListingId}`)}
+        >
+          Yes Edit
+        </button>
+        <button
+          type='button'
+          className="inline-flex items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-gray-100  px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-200"
+          onClick={() => { setWarningOpen(false); setEditListingId(""); }}
+        >
+          Cancel
+        </button>
+      </Modal>
+
       <div className="mt-3 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
@@ -198,7 +253,7 @@ export default function Example() {
                         <Switch onChange={value => publishListing(listing.id, value)} enabled={listing.publish}/>
                       </td>
                       <td className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 px-6 ">
-                        <a href="#" className="text-indigo-600 hover:text-indigo-900 mr-2" onClick={() => router.push(`/listing/${listing.id}`)}>
+                        <a href="#" className="text-indigo-600 hover:text-indigo-900 mr-2" onClick={() => handleEditClick(listing.id)}>
                           Edit
                         </a>
                       </td>
@@ -218,7 +273,7 @@ export default function Example() {
                         <Switch onChange={value => publishListing(listing.id, value)} enabled={listing.publish}/>
                       </td>
                       <td className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 px-6 ">
-                        <a href="#" className="text-indigo-600 hover:text-indigo-900 mr-2" onClick={() => router.push(`/listing/${listing.id}`)}>
+                        <a href="#" className="text-indigo-600 hover:text-indigo-900 mr-2" onClick={() => handleEditClick(listing.id)}>
                           Edit
                         </a>
                       </td>
