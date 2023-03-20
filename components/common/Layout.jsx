@@ -103,9 +103,9 @@ export default function Example(props) {
                   </Transition.Child>
                   <div className="flex flex-shrink-0 items-center px-4">
                     <img
-                      className="h-8 w-auto"
-                      src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-                      alt="Your Company"
+                      className="h-12 w-auto"
+                      src="/sh_logo.png"
+                      alt="Student Housing Logo"
                     />
                   </div>
                   <div className="mt-5 h-0 flex-1 overflow-y-auto">
@@ -148,9 +148,9 @@ export default function Example(props) {
           <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white pt-5">
             <div className="flex flex-shrink-0 items-center px-4">
               <img
-                className="h-8 w-auto"
-                src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-                alt="Your Company"
+                className="h-12 w-auto"
+                src="/sh_logo.png"
+                alt="Student Housing Logo"
               />
             </div>
             <div className="mt-5 flex flex-grow flex-col">
