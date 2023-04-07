@@ -340,6 +340,20 @@ export default function useApi() {
         }
     }
 
+    const unlockBed = async ({order_id, adminKey}) => { 
+        try{ 
+            const response = await axios(base_url + `/order/unlock-bed`, { 
+                method: "POST", 
+                data: { order_id, adminKey } 
+            }); 
+            return response.data; 
+        }
+        catch(err){ 
+            console.log(err); 
+            return err.response.data; 
+        }
+    }
+
     return { 
         getOrders, 
         addAppartment, 
@@ -364,6 +378,7 @@ export default function useApi() {
         updateAppartment, 
         updateBed, 
         updateListing, 
-        updateUser
+        updateUser,
+        unlockBed
     }
 }

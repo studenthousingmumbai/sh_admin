@@ -73,6 +73,7 @@ export default function Example() {
   const [state, setState] = useState(""); 
   const [zip, setZip] = useState(""); 
   const [errors, setErrors] = useState([]); 
+  const [videoLink, setVideoLink] = useState("");
   const { createListing } = useApi(); 
 
   const handleSubmit =  async (e) => { 
@@ -85,6 +86,7 @@ export default function Example() {
     formData.append('description', description); 
     formData.append('price', price); 
     formData.append('gender', gender); 
+    formData.append('video_link', videoLink);
     formData.append('address', JSON.stringify({ line_1, line_2, city, state, zip }));
     formData.append('amenities', JSON.stringify(amenities.map(amenity => amenity.name))); 
 
@@ -116,6 +118,7 @@ export default function Example() {
     setCity(''); 
     setState(''); 
     setZip(''); 
+    setVideoLink("");
   }
 
   return (
@@ -292,7 +295,22 @@ export default function Example() {
                 </div>
               </div>
             </div>      
-                            
+            <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                  Listing Video
+              </label>
+              <div className="mt-1 sm:col-span-2 sm:mt-0">
+                <div className="flex max-w-lg rounded-md shadow-sm">
+                  <input
+                    type="text"
+                    value={videoLink}
+                    onChange={e => setVideoLink(e.target.value)}
+                    autoComplete="username"
+                    className="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+            </div>                
             <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
               <label htmlFor="about" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
                 Property Images

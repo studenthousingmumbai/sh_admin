@@ -48,6 +48,7 @@ export default function index() {
     const [state, setState] = useState(""); 
     const [zip, setZip] = useState(""); 
     const [errors, setErrors] = useState([]);
+    const [videoLink, setVideoLink] = useState("");
     const { getListing, updateListing } = useApi();
  
     const fetchListing = async () => { 
@@ -63,6 +64,7 @@ export default function index() {
         setState(listing.address.state); 
         setZip(listing.address.zip); 
         setPrice(parseInt(listing.price));
+        setVideoLink(listing.video_link);
         setAmenities(listing.amenities.map(amenity => ({ name: amenity }))); 
         setGender(listing.gender); 
         setExistingImages(listing.images); 
@@ -76,7 +78,7 @@ export default function index() {
     }, [isReady]); 
 
     const handleSubmit =  async (e) => { 
-      e.preventDefault(); 
+        e.preventDefault(); 
   
         const formData = new FormData(); 
         
@@ -86,6 +88,7 @@ export default function index() {
         formData.append('address', JSON.stringify({ line_1, line_2, city, state, zip }));
         formData.append('price', price); 
         formData.append('gender', gender); 
+        formData.append('video_link', videoLink);
         formData.append('amenities', JSON.stringify(amenities.map(amenity => amenity.name))); 
         formData.append('existing_images', JSON.stringify(existingImages)); 
 
@@ -120,6 +123,7 @@ export default function index() {
       setCity(''); 
       setState(''); 
       setZip(''); 
+      setVideoLink("");
     }
 
     return (
@@ -184,40 +188,40 @@ export default function index() {
 
                             <div className="space-y-6 sm:space-y-5">
                                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                                <label htmlFor="username" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                                    Listing Name
-                                </label>
-                                <div className="mt-1 sm:col-span-2 sm:mt-0">
-                                    <div className="flex max-w-lg rounded-md shadow-sm">
-                                    {/* <span className="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-gray-50 px-3 text-gray-500 sm:text-sm">
-                                        workcation.com/
-                                    </span> */}
-                                    <input
-                                        type="text"
-                                        value={name}
-                                        onChange={e => setName(e.target.value)}
-                                    //   placeholder="Enter Listing Name"
-                                        autoComplete="username"
-                                        className="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                    />
+                                    <label htmlFor="username" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                        Listing Name
+                                    </label>
+                                    <div className="mt-1 sm:col-span-2 sm:mt-0">
+                                        <div className="flex max-w-lg rounded-md shadow-sm">
+                                        {/* <span className="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-gray-50 px-3 text-gray-500 sm:text-sm">
+                                            workcation.com/
+                                        </span> */}
+                                        <input
+                                            type="text"
+                                            value={name}
+                                            onChange={e => setName(e.target.value)}
+                                        //   placeholder="Enter Listing Name"
+                                            autoComplete="username"
+                                            className="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                        />
+                                        </div>
                                     </div>
-                                </div>
                                 </div>
 
                                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                                <label htmlFor="about" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                                    About
-                                </label>
-                                <div className="mt-1 sm:col-span-2 sm:mt-0">
-                                    <textarea
-                                    value={description}
-                                    onChange={e => setDescription(e.target.value)}
-                                    rows={3}
-                                    className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                    defaultValue={''}
-                                    />
-                                    <p className="mt-2 text-sm text-gray-500">Write a few sentences about the property</p>
-                                </div>
+                                    <label htmlFor="about" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                        About
+                                    </label>
+                                    <div className="mt-1 sm:col-span-2 sm:mt-0">
+                                        <textarea
+                                            value={description}
+                                            onChange={e => setDescription(e.target.value)}
+                                            rows={3}
+                                            className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                            defaultValue={''}
+                                        />
+                                        <p className="mt-2 text-sm text-gray-500">Write a few sentences about the property</p>
+                                    </div>
                                 </div>
 
                                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
@@ -329,23 +333,40 @@ export default function index() {
                                     </div>
                                 </div>
                                 </div>      
+
+                                <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                                    <label htmlFor="username" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                        Listing Video
+                                    </label>
+                                    <div className="mt-1 sm:col-span-2 sm:mt-0">
+                                        <div className="flex max-w-lg rounded-md shadow-sm">
+                                            <input
+                                                type="text"
+                                                value={videoLink}
+                                                onChange={e => setVideoLink(e.target.value)}
+                                                autoComplete="username"
+                                                className="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                                                 
                                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                                <label htmlFor="about" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                                    Property Images
-                                </label>
-                                <div className="mt-1 sm:col-span-2 sm:mt-0">
-                                    <MultiUpload onChange={(files) => setImages(files)} existingImages={existingImages} setExistingImages={setExistingImages}/>
-                                </div>
+                                    <label htmlFor="about" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                        Property Images
+                                    </label>
+                                    <div className="mt-1 sm:col-span-2 sm:mt-0">
+                                        <MultiUpload onChange={(files) => setImages(files)} existingImages={existingImages} setExistingImages={setExistingImages}/>
+                                    </div>
                                 </div>
 
                                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                                <label htmlFor="about" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                                    Amenities
-                                </label>
-                                <div className="mt-1 sm:col-span-2 sm:mt-0">
-                                    <DynamicForm fields={fields} layout={layout} values={amenities} onChange={(state) => setAmenities(state)}/>
-                                </div>
+                                    <label htmlFor="about" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                        Amenities
+                                    </label>
+                                    <div className="mt-1 sm:col-span-2 sm:mt-0">
+                                        <DynamicForm fields={fields} layout={layout} values={amenities} onChange={(state) => setAmenities(state)}/>
+                                    </div>
                                 </div>
                             </div>
                         </div>

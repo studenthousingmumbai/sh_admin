@@ -3,12 +3,14 @@ import { useRouter } from 'next/router'
 
 import api from '../../lib/api'
 import Layout from '../../components/common/Layout';
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/20/solid'
+import { ChevronDownIcon, ChevronUpIcon, EllipsisVerticalIcon } from '@heroicons/react/20/solid'
 import Pagination from '../../components/common/Pagination'; 
 import { ScopeTypes } from '../../constants'
 import Search from '../../components/common/Search';
 import { getNumPages } from '../../utils/getNumPages';
 import useApi from '../../hooks/useApi';
+import Modal from '../../components/common/Modal'; 
+import Errors from '../../components/common/Errors'; 
 
 const order_status_color_scheme = { 
     CREATED: ' bg-blue-100 text-blue-800', 
@@ -28,7 +30,11 @@ export default function Example() {
     const [searchResults, setSearchResults] = useState([]); 
     const [searchQuery, setSearchQuery] = useState(""); 
     const is_mounted = useRef(false); 
-    const { getOrders } = useApi(); 
+    const [unlockModalOpen, setUnlockModalOpen] = useState(false);
+    const [unlockOrderId, setUnlockOrderId] = useState("");
+    const [adminKey, setAdminKey] = useState('');
+    const [unlockErrors, setUnlockErrors] = useState([]);
+    const { getOrders, unlockBed } = useApi(); 
 
     useEffect(() => {
         if(!is_mounted.current) { 
@@ -85,6 +91,30 @@ export default function Example() {
         setSearchResults(results);  
     }
 
+    const handleUnlockBed = async () => { 
+        const unlock_response = await unlockBed({
+            order_id: unlockOrderId,
+            adminKey
+        });
+        console.log("Unlock response: ", unlock_response); 
+        
+        if('errors' in unlock_response) { 
+            setUnlockErrors(unlock_response.errors);
+            return;
+        }
+
+        setUnlockModalOpen(false); 
+        setUnlockOrderId("");
+        setUnlockErrors([]);
+        fetchOrders((currentPage - 1) * pageLimit);
+    }
+
+    const handleUnlockModalClose = () => { 
+        setUnlockModalOpen(false); 
+        setUnlockErrors([]);
+        setUnlockOrderId("");
+    }
+
     return (
         <Layout title="Orders">
             <div className="sm:flex sm:items-center mb-3">
@@ -95,6 +125,44 @@ export default function Example() {
                     </p>
                 </div>
             </div>
+
+            <Modal onClose={handleUnlockModalClose} open={unlockModalOpen} title={"Unlock bed"}>
+                <div className='mb-3'> 
+                    <span>Are you sure you want to unlock this bed? Once unlocked it will be available to other users for booking and can be locked again only by placing an order.</span>
+                </div>
+                <div className='mb-3'>       
+                    <input
+                        type="text"
+                        value={adminKey}
+                        onChange={e => setAdminKey(e.target.value)}
+                        placeholder="Enter Admin Key"
+                        className="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        required
+                    />
+                </div>  
+                { 
+                    unlockErrors.length > 0 && 
+                    <div className='mb-3'>
+                        <Errors errors={unlockErrors}/>
+                    </div>
+                }
+                <div>
+                    <button
+                        type='button'
+                        className="mr-2 inline-flex items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-indigo-600  px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-indigo-700 bg-[#ffcc29] hover:bg-[#fad45a]"
+                        onClick={handleUnlockBed}
+                    >
+                        Yes Unlock
+                    </button>
+                    <button
+                        type='button'
+                        className="inline-flex items-center justify-center whitespace-nowrap rounded-md border border-transparent bg-gray-100  px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-200"
+                        onClick={handleUnlockModalClose}
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </Modal>
 
             <Search 
                 placeholder="Search Orders"
@@ -190,6 +258,9 @@ export default function Example() {
                                                 </span>
                                             </a>
                                         </th>
+                                        <th scope="col" className="px-3 py-3.5 text-left px-6 text-sm font-semibold text-gray-900">
+                                           
+                                        </th>
                                         {/* <th scope="col" className="px-3 py-3.5 text-left px-6 text-sm font-semibold text-gray-900">
                                             <a href="#" className="group inline-flex items-center" onClick={() => sortOrders(orders, "status")}>
                                                 Status 
@@ -222,11 +293,20 @@ export default function Example() {
                                                     order.days_remaining
                                                 }
                                             </td>
-                                            {/* <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                                <span className={"inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" + order_status_color_scheme[order.status]}>
-                                                    {order.status}
-                                                </span>
-                                            </td> */}
+                                            {
+                                                parseInt(order.days_remaining) > 0 && !order.bed.available && 
+                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                                                    <button
+                                                        type="button"
+                                                        className="rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                                                        onClick={() => { setUnlockModalOpen(true); setUnlockOrderId(order.id); }}
+                                                    >
+                                                        Unlock Bed
+                                                    </button>
+                                                </td>
+                                                || 
+                                                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500"></td>
+                                            }
                                         </tr>
                                     ))}
                                     
@@ -251,11 +331,20 @@ export default function Example() {
                                                         order.days_remaining
                                                     }
                                                 </td>
-                                                {/* <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                                    <span className={"inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" + order_status_color_scheme[order.status]}>
-                                                        {order.status}
-                                                    </span>
-                                                </td> */}
+                                                {
+                                                    parseInt(order.days_remaining) > 0 && !order.bed.available && 
+                                                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                                                        <button
+                                                            type="button"
+                                                            className="rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                                                            onClick={() => { setUnlockModalOpen(true); setUnlockOrderId(order.id); }}
+                                                        >
+                                                            Unlock Bed
+                                                        </button>
+                                                    </td>
+                                                    || 
+                                                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500"></td>
+                                                }
                                             </tr>
                                         ))
                                     }
@@ -263,7 +352,7 @@ export default function Example() {
                                     {
                                         searchQuery === "" && 
                                         <tr>
-                                            <td colSpan="9">
+                                            <td colSpan="10">
                                                 <div className='flex w-full justify-end bg-red'> 
                                                     <Pagination 
                                                         totalPages={totalPages}
