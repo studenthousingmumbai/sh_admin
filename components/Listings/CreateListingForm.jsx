@@ -95,8 +95,10 @@ export default function Example() {
     }
 
     const response = await createListing(formData); 
-
+    console.log("create listing response : ", response); 
+    
     if('errors' in response) { 
+      console.log("Errors occured while creating listing!");
       setErrors(response.errors); 
       return;
     }

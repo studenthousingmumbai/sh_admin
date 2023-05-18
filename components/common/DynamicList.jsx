@@ -3,12 +3,9 @@ import { field_types } from '../../constants';
 import MultiUpload from '../common/MultiUpload/MultiUpload';
 
 function DynamicForm({ fields, values, layout, onChange }) {
-    console.log("Values in dynamic form : ", values); 
-
     const [state, setState] = useState(values || []);
 
     useEffect(() => {
-        console.log("Values in dynamic form changed: ", values); 
         setState(values);
     }, [values])
 

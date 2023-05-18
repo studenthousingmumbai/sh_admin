@@ -142,7 +142,7 @@ function MultiUpload(props) {
                             To Upload
                         </h1>
 
-                        <div className='flex'>
+                        <div className='flex flex-wrap'>
                             {
                                 uploads.map((upload, upload_index) => upload.file_type === 'image' ? 
                                     ( 
