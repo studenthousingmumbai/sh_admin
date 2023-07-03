@@ -36,6 +36,30 @@ const layout = [
   ['name'], 
 ]
 
+
+const metatagsFields = { 
+  title: { 
+    type: field_types.TEXT, 
+    variant: field_variants[field_types.TEXT].text, 
+    label: "Meta title", 
+    name: "meta title", 
+    placeholder: "Enter meta title", 
+    required: true, 
+  }, 
+  description: { 
+    type: field_types.TEXT, 
+    variant: field_variants[field_types.TEXT].text, 
+    label: "Meta description", 
+    name: "meta description", 
+    placeholder: "Enter meta description", 
+    required: true, 
+  }
+}
+
+const metatagsLayout = [ 
+  ['title','description']
+]
+
 const values = [
   // {
   //   name: "Swimming Pool",
@@ -66,6 +90,7 @@ export default function Example() {
   const [price, setPrice] = useState(""); 
   const [images, setImages] = useState([]); 
   const [amenities, setAmenities] = useState([]); 
+  const [metatags, setMetatags] = useState([]);
   const [gender, setGender] = useState('');
   const [line_1, setLine1] = useState(""); 
   const [line_2, setLine2] = useState(""); 
@@ -89,6 +114,7 @@ export default function Example() {
     formData.append('video_link', videoLink);
     formData.append('address', JSON.stringify({ line_1, line_2, city, state, zip }));
     formData.append('amenities', JSON.stringify(amenities.map(amenity => amenity.name))); 
+    formData.append('metatags', JSON.stringify(metatags)); 
 
     for(let image of images) {
       formData.append('images', image.file); 
@@ -121,6 +147,7 @@ export default function Example() {
     setState(''); 
     setZip(''); 
     setVideoLink("");
+    setMetatags([]);
   }
 
   return (
@@ -328,6 +355,15 @@ export default function Example() {
               </label>
               <div className="mt-1 sm:col-span-2 sm:mt-0">
                 <DynamicForm fields={fields} layout={layout} values={values} onChange={(state) => setAmenities(state)}/>
+              </div>
+            </div>
+
+            <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+              <label htmlFor="about" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                Metatags
+              </label>
+              <div className="mt-1 sm:col-span-2 sm:mt-0">
+                <DynamicForm fields={metatagsFields} layout={metatagsLayout} values={values} onChange={(state) => setMetatags(state)}/>
               </div>
             </div>
           </div>

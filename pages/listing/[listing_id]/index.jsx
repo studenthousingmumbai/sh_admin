@@ -24,6 +24,29 @@ const fields = {
 const layout = [ 
     ['name'], 
 ]
+
+const metatagsFields = { 
+  title: { 
+    type: field_types.TEXT, 
+    variant: field_variants[field_types.TEXT].text, 
+    label: "Meta title", 
+    name: "meta title", 
+    placeholder: "Enter meta title", 
+    required: true, 
+  }, 
+  description: { 
+    type: field_types.TEXT, 
+    variant: field_variants[field_types.TEXT].text, 
+    label: "Meta description", 
+    name: "meta description", 
+    placeholder: "Enter meta description", 
+    required: true, 
+  }
+}
+
+const metatagsLayout = [ 
+  ['title','description']
+]
  
 const genderOptions = [
     { id: 'male', title: 'Male' },
@@ -40,6 +63,7 @@ export default function index() {
     const [price, setPrice] = useState(""); 
     const [images, setImages] = useState([]); 
     const [amenities, setAmenities] = useState([]); 
+    const [metatags, setMetatags] = useState([]);
     const [gender, setGender] = useState(''); 
     const [existingImages, setExistingImages] = useState([]); 
     const [line_1, setLine1] = useState(""); 
@@ -68,6 +92,7 @@ export default function index() {
         setAmenities(listing.amenities.map(amenity => ({ name: amenity }))); 
         setGender(listing.gender); 
         setExistingImages(listing.images); 
+        setMetatags(listing.metatags);
     }
 
     useEffect(() => { 
@@ -91,6 +116,7 @@ export default function index() {
         formData.append('video_link', videoLink);
         formData.append('amenities', JSON.stringify(amenities.map(amenity => amenity.name))); 
         formData.append('existing_images', JSON.stringify(existingImages)); 
+        formData.append('metatags', JSON.stringify(metatags)); 
 
         if(images.length !== 0) {
             for(let image of images) {
@@ -110,20 +136,21 @@ export default function index() {
     }
   
     const resetForm = () => { 
-      // reset form state 
-      setName(""); 
-      setDescription(""); 
-      setAddress(""); 
-      setPrice(""); 
-      setImages([]); 
-      setAmenities([]); 
-      setGender(''); 
-      setLine1(''); 
-      setLine2(''); 
-      setCity(''); 
-      setState(''); 
-      setZip(''); 
-      setVideoLink("");
+        // reset form state 
+        setName(""); 
+        setDescription(""); 
+        setAddress(""); 
+        setPrice(""); 
+        setImages([]); 
+        setAmenities([]); 
+        setGender(''); 
+        setLine1(''); 
+        setLine2(''); 
+        setCity(''); 
+        setState(''); 
+        setZip(''); 
+        setVideoLink("");
+        setMetatags([]);
     }
 
     return (
@@ -302,9 +329,11 @@ export default function index() {
                                 </div>
 
                                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                                
                                 <label htmlFor="about" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
                                     Gender
                                 </label>
+
                                 <div className="mt-1 sm:col-span-2 sm:mt-0">
                                     <div>
                                     {/* <label className="text-base font-medium text-gray-900">Select Gender</label>
@@ -366,6 +395,15 @@ export default function index() {
                                     </label>
                                     <div className="mt-1 sm:col-span-2 sm:mt-0">
                                         <DynamicForm fields={fields} layout={layout} values={amenities} onChange={(state) => setAmenities(state)}/>
+                                    </div>
+                                </div>
+
+                                <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                                    <label htmlFor="about" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                        Metatags
+                                    </label>
+                                    <div className="mt-1 sm:col-span-2 sm:mt-0">
+                                        <DynamicForm fields={metatagsFields} layout={metatagsLayout} values={metatags} onChange={(state) => setMetatags(state)}/>
                                     </div>
                                 </div>
                             </div>
