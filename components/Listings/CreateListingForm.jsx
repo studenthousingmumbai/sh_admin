@@ -60,6 +60,66 @@ const metatagsLayout = [
   ['title','description']
 ]
 
+const faqFields = { 
+  question: { 
+    type: field_types.TEXT, 
+    variant: field_variants[field_types.TEXT].text, 
+    label: "Question", 
+    name: "question", 
+    placeholder: "Enter question", 
+    required: true, 
+  }, 
+  answer: { 
+    type: field_types.TEXT, 
+    variant: field_variants[field_types.TEXT].text, 
+    label: "Answer", 
+    name: "answer", 
+    placeholder: "Enter answer", 
+    required: true, 
+  }, 
+}
+
+const faqLayout = [ 
+  ['question','answer']
+];
+
+const occupancyFields = { 
+  description: { 
+    type: field_types.TEXT, 
+    variant: field_variants[field_types.TEXT].text, 
+    label: "Description", 
+    name: "description", 
+    placeholder: "Enter occupancy description", 
+    required: true, 
+  }, 
+  price: { 
+    type: field_types.TEXT, 
+    variant: field_variants[field_types.TEXT].text, 
+    label: "Price", 
+    name: "price", 
+    placeholder: "Enter price", 
+    required: true, 
+  }, 
+  total_beds: { 
+    type: field_types.TEXT, 
+    variant: field_variants[field_types.TEXT].text, 
+    label: "Total Beds", 
+    name: "total_beds", 
+    placeholder: "Enter total beds", 
+    required: true, 
+  },
+  period: { 
+    type: field_types.DROPDOWN, 
+    label: "Time Period", 
+    required: true, 
+    options: ['month', 'year']
+  }
+}
+
+const occupancyLayout = [ 
+  ['description','price', 'total_beds', 'period']
+];
+
 const values = [
   // {
   //   name: "Swimming Pool",
@@ -91,6 +151,8 @@ export default function Example() {
   const [images, setImages] = useState([]); 
   const [amenities, setAmenities] = useState([]); 
   const [metatags, setMetatags] = useState([]);
+  const [faqs, setFaqs] = useState([]);
+  const [occupancies, setOccupancies] = useState([]);
   const [gender, setGender] = useState('');
   const [line_1, setLine1] = useState(""); 
   const [line_2, setLine2] = useState(""); 
@@ -115,6 +177,8 @@ export default function Example() {
     formData.append('address', JSON.stringify({ line_1, line_2, city, state, zip }));
     formData.append('amenities', JSON.stringify(amenities.map(amenity => amenity.name))); 
     formData.append('metatags', JSON.stringify(metatags)); 
+    formData.append('faqs', JSON.stringify(faqs)); 
+    formData.append('occupancies', JSON.stringify(occupancies)); 
 
     for(let image of images) {
       formData.append('images', image.file); 
@@ -148,6 +212,8 @@ export default function Example() {
     setZip(''); 
     setVideoLink("");
     setMetatags([]);
+    setFaqs([]);
+    setOccupancies([]);
   }
 
   return (
@@ -364,6 +430,24 @@ export default function Example() {
               </label>
               <div className="mt-1 sm:col-span-2 sm:mt-0">
                 <DynamicForm fields={metatagsFields} layout={metatagsLayout} values={values} onChange={(state) => setMetatags(state)}/>
+              </div>
+            </div>
+
+            <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+              <label htmlFor="about" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                Faqs
+              </label>
+              <div className="mt-1 sm:col-span-2 sm:mt-0">
+                <DynamicForm fields={faqFields} layout={faqLayout} values={values} onChange={(state) => setFaqs(state)}/>
+              </div>
+            </div>
+
+            <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+              <label htmlFor="about" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                Occupancies
+              </label>
+              <div className="mt-1 sm:col-span-2 sm:mt-0">
+                <DynamicForm fields={occupancyFields} layout={occupancyLayout} values={values} onChange={(state) => setOccupancies(state)}/>
               </div>
             </div>
           </div>

@@ -69,6 +69,25 @@ function DynamicForm({ fields, values, layout, onChange }) {
                                                             <MultiUpload onChange={files => handleChange(index, field, files)}/>
                                                         </div> 
                                                         : 
+                                                        fields[field].type === field_types.DROPDOWN ? 
+                                                        <div className='flex-1 w-full h-full'>
+                                                            <select
+                                                                id={fields[field].label}
+                                                                name={fields[field].label}
+                                                                className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                                                onChange={(e) => handleChange(index, field, e.target.value)}
+                                                                value={value[field]}
+                                                                required={fields[field].required} 
+                                                            >
+                                                                <option value="" disabled selected>Select your option</option>
+                                                                {
+                                                                    fields[field].options.map(option => ( 
+                                                                        <option value={option}>{option}</option>
+                                                                    ))
+                                                                }
+                                                            </select>
+                                                        </div>
+                                                        :
                                                         <></>
                                                 ))
                                             }

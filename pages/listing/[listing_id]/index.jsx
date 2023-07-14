@@ -12,42 +12,102 @@ import Errors from '../../../components/common/Errors';
 
 const fields = {
     name: {
-      type: field_types.TEXT,
-      variant: field_variants[field_types.TEXT].text,
-      label: "Name",
-      name: "name",
-      placeholder: "Enter Amenity Name",
-      required: true,
+        type: field_types.TEXT,
+        variant: field_variants[field_types.TEXT].text,
+        label: "Name",
+        name: "name",
+        placeholder: "Enter Amenity Name",
+        required: true,
     }
 };
   
 const layout = [ 
     ['name'], 
-]
+]; 
 
 const metatagsFields = { 
-  title: { 
-    type: field_types.TEXT, 
-    variant: field_variants[field_types.TEXT].text, 
-    label: "Meta title", 
-    name: "meta title", 
-    placeholder: "Enter meta title", 
-    required: true, 
-  }, 
-  description: { 
-    type: field_types.TEXT, 
-    variant: field_variants[field_types.TEXT].text, 
-    label: "Meta description", 
-    name: "meta description", 
-    placeholder: "Enter meta description", 
-    required: true, 
-  }
-}
+    title: { 
+        type: field_types.TEXT, 
+        variant: field_variants[field_types.TEXT].text, 
+        label: "Meta title", 
+        name: "meta title", 
+        placeholder: "Enter meta title", 
+        required: true, 
+    }, 
+    description: { 
+        type: field_types.TEXT, 
+        variant: field_variants[field_types.TEXT].text, 
+        label: "Meta description", 
+        name: "meta description", 
+        placeholder: "Enter meta description", 
+        required: true, 
+    }
+};
 
 const metatagsLayout = [ 
   ['title','description']
-]
+];
  
+const faqFields = { 
+    question: { 
+        type: field_types.TEXT, 
+        variant: field_variants[field_types.TEXT].text, 
+        label: "Question", 
+        name: "question", 
+        placeholder: "Enter question", 
+        required: true, 
+    }, 
+    answer: { 
+        type: field_types.TEXT, 
+        variant: field_variants[field_types.TEXT].text, 
+        label: "Answer", 
+        name: "answer", 
+        placeholder: "Enter answer", 
+        required: true, 
+    }, 
+};
+
+const faqLayout = [ 
+    ['question','answer']
+];
+
+const occupancyFields = { 
+    description: { 
+        type: field_types.TEXT, 
+        variant: field_variants[field_types.TEXT].text, 
+        label: "Description", 
+        name: "description", 
+        placeholder: "Enter occupancy description", 
+        required: true, 
+    }, 
+    price: { 
+        type: field_types.TEXT, 
+        variant: field_variants[field_types.TEXT].text, 
+        label: "Price", 
+        name: "price", 
+        placeholder: "Enter price", 
+        required: true, 
+    }, 
+    total_beds: { 
+        type: field_types.TEXT, 
+        variant: field_variants[field_types.TEXT].text, 
+        label: "Total Beds", 
+        name: "total_beds", 
+        placeholder: "Enter total beds", 
+        required: true, 
+    },
+    period: { 
+        type: field_types.DROPDOWN, 
+        label: "Time Period", 
+        required: true, 
+        options: ['month', 'year']
+    }
+};
+  
+const occupancyLayout = [ 
+    ['description', 'price', 'total_beds', 'period']
+];
+
 const genderOptions = [
     { id: 'male', title: 'Male' },
     { id: 'female', title: 'Female' }
@@ -64,6 +124,8 @@ export default function index() {
     const [images, setImages] = useState([]); 
     const [amenities, setAmenities] = useState([]); 
     const [metatags, setMetatags] = useState([]);
+    const [faqs, setFaqs] = useState([]);
+    const [occupancies, setOccupancies] = useState([]);
     const [gender, setGender] = useState(''); 
     const [existingImages, setExistingImages] = useState([]); 
     const [line_1, setLine1] = useState(""); 
@@ -93,6 +155,8 @@ export default function index() {
         setGender(listing.gender); 
         setExistingImages(listing.images); 
         setMetatags(listing.metatags);
+        setFaqs(listing.faqs);
+        setOccupancies(listing.occupancies);
     }
 
     useEffect(() => { 
@@ -117,6 +181,8 @@ export default function index() {
         formData.append('amenities', JSON.stringify(amenities.map(amenity => amenity.name))); 
         formData.append('existing_images', JSON.stringify(existingImages)); 
         formData.append('metatags', JSON.stringify(metatags)); 
+        formData.append('faqs', JSON.stringify(faqs)); 
+        formData.append('occupancies', JSON.stringify(occupancies)); 
 
         if(images.length !== 0) {
             for(let image of images) {
@@ -151,6 +217,8 @@ export default function index() {
         setZip(''); 
         setVideoLink("");
         setMetatags([]);
+        setFaqs([]);
+        setOccupancies([]);
     }
 
     return (
@@ -404,6 +472,24 @@ export default function index() {
                                     </label>
                                     <div className="mt-1 sm:col-span-2 sm:mt-0">
                                         <DynamicForm fields={metatagsFields} layout={metatagsLayout} values={metatags} onChange={(state) => setMetatags(state)}/>
+                                    </div>
+                                </div>
+
+                                <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                                    <label htmlFor="about" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                        Faqs
+                                    </label>
+                                    <div className="mt-1 sm:col-span-2 sm:mt-0">
+                                        <DynamicForm fields={faqFields} layout={faqLayout} values={faqs} onChange={(state) => setFaqs(state)}/>
+                                    </div>
+                                </div>
+
+                                <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                                    <label htmlFor="about" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                        Occupancies
+                                    </label>
+                                    <div className="mt-1 sm:col-span-2 sm:mt-0">
+                                        <DynamicForm fields={occupancyFields} layout={occupancyLayout} values={occupancies} onChange={(state) => setOccupancies(state)}/>
                                     </div>
                                 </div>
                             </div>
