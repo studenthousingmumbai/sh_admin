@@ -110,7 +110,8 @@ const occupancyLayout = [
 
 const genderOptions = [
     { id: 'male', title: 'Male' },
-    { id: 'female', title: 'Female' }
+    { id: 'female', title: 'Female' }, 
+    { id: 'unisex', title: 'Unisex' }, 
 ]; 
 
 export default function index() {
